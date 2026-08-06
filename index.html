@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moments with My Friend</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Quicksand:wght@400;600&display=swap');
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #fdf6ec, #f7e8d8);
+    font-family: 'Quicksand', sans-serif;
+    color: #4a3f35;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  header h1 {
+    font-family: 'Caveat', cursive;
+    font-size: 3.5rem;
+    margin: 0;
+    color: #6b4f3f;
+  }
+
+  header p {
+    font-size: 1.1rem;
+    color: #8a7566;
+    margin-top: 8px;
+  }
+
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .polaroid {
+    background: #fffdf9;
+    padding: 16px 16px 30px 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    width: 240px;
+    border-radius: 3px;
+    transform: rotate(var(--rot));
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+  }
+
+  .polaroid:hover {
+    transform: rotate(0deg) scale(1.06);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+    z-index: 5;
+  }
+
+  .polaroid img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+    border-radius: 2px;
+  }
+
+  .polaroid p {
+    font-family: 'Caveat', cursive;
+    font-size: 1.4rem;
+    text-align: center;
+    margin: 14px 0 0 0;
+    color: #5b4636;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    font-size: 0.9rem;
+    color: #a1897a;
+  }
+
+  footer span {
+    font-family: 'Caveat', cursive;
+    font-size: 1.3rem;
+    display: block;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Moments with My Favorite Person</h1>
+  <p>A little scrapbook of the good stuff 💛</p>
+</header>
+
+<div class="gallery" id="gallery"></div>
+
+<footer>
+  made with way too much affection
+  <span>here's to many more of these</span>
+</footer>
+
+<script>
+  const photos = [
+    { seed: "1", caption: "the day it all started" },
+    { seed: "2", caption: "certified troublemakers" },
+    { seed: "3", caption: "best road trip ever" },
+    { seed: "4", caption: "that laugh though" },
+    { seed: "5", caption: "we don't take good pics but we take real ones" },
+    { seed: "6", caption: "10/10 would do again" },
+    { seed: "7", caption: "unplanned but iconic" },
+    { seed: "8", caption: "still my favorite person" },
+    { seed: "9", caption: "we were NOT ready for this" },
+    { seed: "10", caption: "core memory unlocked" }
+  ];
+
+  const gallery = document.getElementById("gallery");
+
+  photos.forEach(photo => {
+    const rot = (Math.random() * 10 - 5).toFixed(1);
+    const div = document.createElement("div");
+    div.className = "polaroid";
+    div.style.setProperty("--rot", `${rot}deg`);
+    div.innerHTML = `
+      <img src="https://picsum.photos/seed/${photo.seed}/400/400" alt="${photo.caption}">
+      <p>${photo.caption}</p>
+    `;
+    gallery.appendChild(div);
+  });
+</script>
+
+</body>
+</html>
