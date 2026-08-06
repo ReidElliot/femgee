@@ -3,36 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moments with My Friend</title>
+<title>Bengee's Cute Corner ♡</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Quicksand:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Quicksand:wght@400;600;700&display=swap');
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
     padding: 60px 20px;
-    background: linear-gradient(135deg, #fdf6ec, #f7e8d8);
+    background: linear-gradient(135deg, #ffe3f0, #ffd1e8, #ffe9f5);
     font-family: 'Quicksand', sans-serif;
-    color: #4a3f35;
+    color: #7a3b60;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "✨ 🎀 ✨ 🎀 ✨ 🎀 ✨ 🎀 ✨ 🎀 ✨ 🎀 ✨ 🎀 ✨";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    font-size: 1.5rem;
+    opacity: 0.15;
+    text-align: center;
+    letter-spacing: 30px;
+    pointer-events: none;
+    z-index: 0;
   }
 
   header {
     text-align: center;
     margin-bottom: 50px;
+    position: relative;
+    z-index: 1;
   }
 
   header h1 {
     font-family: 'Caveat', cursive;
-    font-size: 3.5rem;
+    font-size: 4rem;
     margin: 0;
-    color: #6b4f3f;
+    color: #e0559c;
+    text-shadow: 2px 2px 0px #fff, 3px 3px 8px rgba(224,85,156,0.3);
+  }
+
+  header h1::before,
+  header h1::after {
+    content: "🎀";
+    font-size: 2.5rem;
+    margin: 0 15px;
+    vertical-align: middle;
   }
 
   header p {
-    font-size: 1.1rem;
-    color: #8a7566;
-    margin-top: 8px;
+    font-size: 1.2rem;
+    color: #c96e9e;
+    margin-top: 10px;
+    font-weight: 600;
   }
 
   .gallery {
@@ -42,22 +70,36 @@
     gap: 40px;
     max-width: 1100px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
 
   .polaroid {
-    background: #fffdf9;
-    padding: 16px 16px 30px 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    background: #fffafc;
+    padding: 16px 16px 34px 16px;
+    box-shadow: 0 8px 24px rgba(224,85,156,0.25);
     width: 240px;
-    border-radius: 3px;
+    border-radius: 14px;
+    border: 3px solid #ffc2e0;
     transform: rotate(var(--rot));
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     cursor: pointer;
+    position: relative;
+  }
+
+  .polaroid::after {
+    content: "🎀";
+    position: absolute;
+    top: -14px;
+    right: -10px;
+    font-size: 1.8rem;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
   }
 
   .polaroid:hover {
-    transform: rotate(0deg) scale(1.06);
-    box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+    transform: rotate(0deg) scale(1.08);
+    box-shadow: 0 16px 34px rgba(224,85,156,0.4);
+    border-color: #ff8fc4;
     z-index: 5;
   }
 
@@ -66,58 +108,66 @@
     height: 220px;
     object-fit: cover;
     display: block;
-    border-radius: 2px;
+    border-radius: 8px;
   }
 
   .polaroid p {
     font-family: 'Caveat', cursive;
-    font-size: 1.4rem;
+    font-weight: 600;
+    font-size: 1.5rem;
     text-align: center;
     margin: 14px 0 0 0;
-    color: #5b4636;
+    color: #d6558f;
   }
 
   footer {
     text-align: center;
     margin-top: 60px;
-    font-size: 0.9rem;
-    color: #a1897a;
+    font-size: 0.95rem;
+    color: #c96e9e;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
   }
 
   footer span {
     font-family: 'Caveat', cursive;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     display: block;
     margin-top: 6px;
+    color: #e0559c;
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Moments with My Favorite Person</h1>
-  <p>A little scrapbook of the good stuff 💛</p>
+  <h1>Bengee's Cute Corner</h1>
+  <p>a lil scrapbook, made with sparkles and love ♡</p>
 </header>
 
 <div class="gallery" id="gallery"></div>
 
 <footer>
-  made with way too much affection
-  <span>here's to many more of these</span>
+  made with way too much affection ♡
+  <span>here's to many more of these ✨</span>
 </footer>
 
 <script>
+  // Add a new line here any time you want another photo on the page.
+  // file: path to the image inside your repo (e.g. Bengee_Images/yourphoto.jpg)
+  // caption: whatever text you want under it
   const photos = [
-    { seed: "1", caption: "the day it all started" },
-    { seed: "2", caption: "certified troublemakers" },
-    { seed: "3", caption: "best road trip ever" },
-    { seed: "4", caption: "that laugh though" },
-    { seed: "5", caption: "we don't take good pics but we take real ones" },
-    { seed: "6", caption: "10/10 would do again" },
-    { seed: "7", caption: "unplanned but iconic" },
-    { seed: "8", caption: "still my favorite person" },
-    { seed: "9", caption: "we were NOT ready for this" },
-    { seed: "10", caption: "core memory unlocked" }
+    { file: "Bengee_Images/photo1.jpg", caption: "the day it all started" },
+    { file: "Bengee_Images/photo2.jpg", caption: "certified troublemakers" },
+    { file: "Bengee_Images/photo3.jpg", caption: "best road trip ever" },
+    { file: "Bengee_Images/photo4.jpg", caption: "that laugh though" },
+    { file: "Bengee_Images/photo5.jpg", caption: "we don't take good pics but we take real ones" },
+    { file: "Bengee_Images/photo6.jpg", caption: "10/10 would do again" },
+    { file: "Bengee_Images/photo7.jpg", caption: "unplanned but iconic" },
+    { file: "Bengee_Images/photo8.jpg", caption: "still my favorite person" },
+    { file: "Bengee_Images/photo9.jpg", caption: "we were NOT ready for this" },
+    { file: "Bengee_Images/photo10.jpg", caption: "core memory unlocked" }
   ];
 
   const gallery = document.getElementById("gallery");
@@ -128,7 +178,7 @@
     div.className = "polaroid";
     div.style.setProperty("--rot", `${rot}deg`);
     div.innerHTML = `
-      <img src="https://picsum.photos/seed/${photo.seed}/400/400" alt="${photo.caption}">
+      <img src="${photo.file}" alt="${photo.caption}">
       <p>${photo.caption}</p>
     `;
     gallery.appendChild(div);
