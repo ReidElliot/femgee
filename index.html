@@ -184,6 +184,66 @@
     color: #d6558f;
     margin: 16px 0 0 0;
   }
+
+  .heart {
+    position: fixed;
+    bottom: -40px;
+    font-size: 1.5rem;
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 0;
+    animation: floatUp linear forwards;
+  }
+
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0) translateX(0) rotate(0deg);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(-110vh) translateX(var(--drift)) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  .sparkle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 200;
+    font-size: 1rem;
+    animation: sparkleFade 0.6s ease-out forwards;
+  }
+
+  @keyframes sparkleFade {
+    0% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.4) translateY(-20px);
+    }
+  }
+
+  .music-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #ffe3f0;
+    border: 3px solid #ffc2e0;
+    border-radius: 50%;
+    width: 54px;
+    height: 54px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    z-index: 150;
+    box-shadow: 0 4px 12px rgba(224,85,156,0.3);
+    transition: transform 0.2s ease;
+  }
+
+  .music-toggle:hover {
+    transform: scale(1.1);
+  }
 </style>
 </head>
 <body>
@@ -192,6 +252,9 @@
   <h1>Bengee's Cute Corner</h1>
   <p>a lil scrapbook, made with sparkles and love ♡</p>
 </header>
+
+<button class="music-toggle" id="musicToggle" title="play music">🎵</button>
+<audio id="bgMusic" src="Bengee_Images/background-music.mp3" loop></audio>
 
 <div class="gallery" id="gallery"></div>
 
@@ -263,6 +326,52 @@
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") lightbox.classList.remove("active");
+  });
+
+  // Floating hearts drifting up in the background
+  const heartEmojis = ["💗", "💕", "🩷", "💖"];
+  function spawnHeart() {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+    heart.style.left = `${Math.random() * 100}vw`;
+    heart.style.setProperty("--drift", `${(Math.random() * 100 - 50)}px`);
+    const duration = 8 + Math.random() * 6;
+    heart.style.animationDuration = `${duration}s`;
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), duration * 1000);
+  }
+  setInterval(spawnHeart, 900);
+
+  // Sparkle trail following the mouse
+  const sparkleEmojis = ["✨", "🎀", "💫"];
+  let lastSparkle = 0;
+  document.addEventListener("mousemove", (e) => {
+    const now = Date.now();
+    if (now - lastSparkle < 60) return; // throttle so it's not overwhelming
+    lastSparkle = now;
+    const sparkle = document.createElement("div");
+    sparkle.className = "sparkle";
+    sparkle.textContent = sparkleEmojis[Math.floor(Math.random() * sparkleEmojis.length)];
+    sparkle.style.left = `${e.clientX}px`;
+    sparkle.style.top = `${e.clientY}px`;
+    document.body.appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 600);
+  });
+
+  // Background music toggle
+  const musicToggle = document.getElementById("musicToggle");
+  const bgMusic = document.getElementById("bgMusic");
+  let playing = false;
+  musicToggle.addEventListener("click", () => {
+    if (playing) {
+      bgMusic.pause();
+      musicToggle.textContent = "🎵";
+    } else {
+      bgMusic.play().catch(() => {});
+      musicToggle.textContent = "🔇";
+    }
+    playing = !playing;
   });
 </script>
 
