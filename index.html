@@ -244,17 +244,130 @@
   .music-toggle:hover {
     transform: scale(1.1);
   }
+
+  .pinball-toggle {
+    position: fixed;
+    top: 20px;
+    right: 86px;
+    background: #ffe3f0;
+    border: 3px solid #ffc2e0;
+    border-radius: 50%;
+    width: 54px;
+    height: 54px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    z-index: 150;
+    box-shadow: 0 4px 12px rgba(224,85,156,0.3);
+    transition: transform 0.2s ease;
+  }
+
+  .pinball-toggle:hover {
+    transform: scale(1.1);
+  }
+
+  .pinball-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(122, 59, 96, 0.8);
+    z-index: 300;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .pinball-overlay.active {
+    display: flex;
+  }
+
+  .pinball-modal {
+    background: linear-gradient(160deg, #fff0f7, #ffe3f0);
+    border: 5px solid #ff8fc4;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    text-align: center;
+    max-width: 95vw;
+  }
+
+  .pinball-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Caveat', cursive;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #e0559c;
+    margin-bottom: 8px;
+  }
+
+  .pinball-close {
+    background: #ffc2e0;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #7a3b60;
+    font-weight: 700;
+  }
+
+  .pinball-close:hover {
+    background: #ff8fc4;
+  }
+
+  .pinball-score {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+    color: #c96e9e;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+  }
+
+  #pinballCanvas {
+    background: #fff5fa;
+    border: 4px solid #ffc2e0;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;
+    touch-action: none;
+  }
+
+  .pinball-instructions {
+    font-family: 'Quicksand', sans-serif;
+    color: #c96e9e;
+    font-size: 0.85rem;
+    margin: 10px 0 0 0;
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Bengee's Cute Corner</h1>
-  <p>a place to store Bengee's cutest pics >W< </p>
+  <p>a lil scrapbook, made with sparkles and love ♡</p>
 </header>
 
 <button class="music-toggle" id="musicToggle" title="play music">🎵</button>
 <audio id="bgMusic" src="Bengee_Images/background-music.mp3" loop></audio>
+
+<button class="pinball-toggle" id="pinballToggle" title="play pinball">🎮</button>
+
+<div class="pinball-overlay" id="pinballOverlay">
+  <div class="pinball-modal">
+    <div class="pinball-header">
+      <span>🎀 Bengee Ball 🎀</span>
+      <button class="pinball-close" id="pinballClose">✕</button>
+    </div>
+    <div class="pinball-score">Score: <span id="pinballScore">0</span></div>
+    <canvas id="pinballCanvas" width="360" height="540"></canvas>
+    <p class="pinball-instructions">← → or tap left/right to flip · Space or tap the lane to launch · tap a bow to pop it</p>
+  </div>
+</div>
 
 <div class="gallery" id="gallery"></div>
 
@@ -266,8 +379,8 @@
 </div>
 
 <footer>
-  made with way too much affection :3
-  <span>we all crackin' fr</span>
+  made with way too much affection ♡
+  <span>here's to many more of these ✨</span>
 </footer>
 
 <script>
@@ -290,7 +403,7 @@
     { file: "Bengee_Images/photo13.jpg", caption: "5 one inch dildos or 1 five inch dildo " },
     { file: "Bengee_Images/photo14.png", caption: "How i look at bro when he says i can crack but i see he dont have socks on" },
     { file: "Bengee_Images/photo15.jpg", caption: "even more distinguished" },
-    { file: "Bengee_Images/photo16.jpg", caption: "ching chong over here" },
+    { file: "Bengee_Images/photo16.jpg", caption: "certified menace" },
     { file: "Bengee_Images/photo17.jpg", caption: "R U Tung Tung cause i wanna give U some tongue tongue" }
   ];
 
@@ -329,7 +442,7 @@
   });
 
   // Floating hearts drifting up in the background
-  const heartEmojis = ["💗", "💕", "🩷", "💖", "🍆"];
+  const heartEmojis = ["💗", "💕", "🩷", "💖"];
   function spawnHeart() {
     const heart = document.createElement("div");
     heart.className = "heart";
@@ -372,6 +485,289 @@
       musicToggle.textContent = "🔇";
     }
     playing = !playing;
+  });
+
+  // ---------- Pinball game ----------
+  const pinballOverlay = document.getElementById("pinballOverlay");
+  const pinballToggle = document.getElementById("pinballToggle");
+  const pinballClose = document.getElementById("pinballClose");
+  const canvas = document.getElementById("pinballCanvas");
+  const ctx = canvas.getContext("2d");
+  const scoreEl = document.getElementById("pinballScore");
+
+  const W = canvas.width, H = canvas.height;
+  let animId = null;
+  let score = 0;
+
+  const ball = { x: W - 20, y: H - 60, r: 9, vx: 0, vy: 0, launched: false };
+  const gravity = 0.28;
+  const friction = 0.995;
+
+  // Walls: outer boundary with a launch lane on the right
+  const laneX = W - 34;
+
+  // Bumpers (pink circles that bounce the ball and add score)
+  const bumpers = [
+    { x: 110, y: 150, r: 26, hit: 0 },
+    { x: 230, y: 130, r: 26, hit: 0 },
+    { x: 170, y: 230, r: 22, hit: 0 },
+    { x: 90, y: 300, r: 20, hit: 0 },
+    { x: 250, y: 300, r: 20, hit: 0 }
+  ];
+
+  // Flippers
+  const flipperLen = 62;
+  const leftFlipper = { x: 110, y: H - 60, angle: 0.5, min: 0.5, max: -0.5, moving: false };
+  const rightFlipper = { x: laneX - 60, y: H - 60, angle: Math.PI - 0.5, min: Math.PI - 0.5, max: Math.PI + 0.5, moving: false };
+
+  let leftDown = false, rightDown = false;
+
+  function resetBall() {
+    ball.x = W - 20;
+    ball.y = H - 60;
+    ball.vx = 0;
+    ball.vy = 0;
+    ball.launched = false;
+  }
+
+  function launchBall() {
+    if (!ball.launched && ball.x > laneX - 20) {
+      ball.vy = -12 - Math.random() * 2;
+      ball.vx = -1;
+      ball.launched = true;
+    }
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (!pinballOverlay.classList.contains("active")) return;
+    if (e.key === "ArrowLeft") leftDown = true;
+    if (e.key === "ArrowRight") rightDown = true;
+    if (e.key === " ") { e.preventDefault(); launchBall(); }
+  });
+  document.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowLeft") leftDown = false;
+    if (e.key === "ArrowRight") rightDown = false;
+  });
+
+  // Touch / click controls for mobile: tap left half = left flipper,
+  // tap right half = right flipper. Tapping directly on a bumper pops it.
+  function getCanvasPos(evt) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+    const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+  }
+
+  function popBumper(b) {
+    b.hit = 8;
+    score += 10;
+    scoreEl.textContent = score;
+    // If the ball's nearby, give it a little nudge too
+    const dx = ball.x - b.x, dy = ball.y - b.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < b.r + 60) {
+      const nx = dx / (dist || 1), ny = dy / (dist || 1);
+      ball.vx += nx * 6;
+      ball.vy += ny * 6 - 2;
+    }
+  }
+
+  function handlePress(evt) {
+    const pos = getCanvasPos(evt);
+
+    // Check bumper taps first
+    for (const b of bumpers) {
+      const dx = pos.x - b.x, dy = pos.y - b.y;
+      if (Math.sqrt(dx * dx + dy * dy) < b.r + 6) {
+        popBumper(b);
+        return;
+      }
+    }
+
+    // Otherwise treat as a flipper press, or launch if tapped in the lane
+    if (pos.x > laneX - 15) {
+      launchBall();
+    } else if (pos.x < W / 2) {
+      leftDown = true;
+    } else {
+      rightDown = true;
+    }
+  }
+
+  function handleRelease() {
+    leftDown = false;
+    rightDown = false;
+  }
+
+  canvas.addEventListener("mousedown", handlePress);
+  canvas.addEventListener("mouseup", handleRelease);
+  canvas.addEventListener("mouseleave", handleRelease);
+  canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handlePress(e); }, { passive: false });
+  canvas.addEventListener("touchend", (e) => { e.preventDefault(); handleRelease(); }, { passive: false });
+
+  function drawFlipper(f, pivotSide) {
+    ctx.save();
+    ctx.translate(f.x, f.y);
+    ctx.rotate(f.angle);
+    ctx.fillStyle = "#e0559c";
+    ctx.beginPath();
+    ctx.roundRect(0, -7, pivotSide === "left" ? flipperLen : -flipperLen, 14, 7);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function updateFlippers() {
+    const speed = 0.35;
+    if (leftDown && leftFlipper.angle > leftFlipper.max) leftFlipper.angle -= speed;
+    if (!leftDown && leftFlipper.angle < leftFlipper.min) leftFlipper.angle += speed;
+    if (rightDown && rightFlipper.angle < rightFlipper.max) rightFlipper.angle += speed;
+    if (!rightDown && rightFlipper.angle > rightFlipper.min) rightFlipper.angle -= speed;
+  }
+
+  function flipperTip(f, pivotSide) {
+    const len = pivotSide === "left" ? flipperLen : -flipperLen;
+    return { x: f.x + Math.cos(f.angle) * len, y: f.y + Math.sin(f.angle) * len };
+  }
+
+  function ballHitsSegment(p1, p2) {
+    const dx = p2.x - p1.x, dy = p2.y - p1.y;
+    const lenSq = dx * dx + dy * dy;
+    let t = ((ball.x - p1.x) * dx + (ball.y - p1.y) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const closestX = p1.x + t * dx;
+    const closestY = p1.y + t * dy;
+    const distX = ball.x - closestX, distY = ball.y - closestY;
+    const dist = Math.sqrt(distX * distX + distY * distY);
+    if (dist < ball.r + 8) {
+      const nx = distX / (dist || 1), ny = distY / (dist || 1);
+      ball.x = closestX + nx * (ball.r + 8);
+      ball.y = closestY + ny * (ball.r + 8);
+      const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+      ball.vx = nx * Math.max(speed, 8);
+      ball.vy = ny * Math.max(speed, 8) - 3;
+    }
+  }
+
+  function update() {
+    if (ball.launched) {
+      ball.vy += gravity;
+      ball.vx *= friction;
+      ball.vy *= friction;
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // Launch lane wall (keeps ball in lane until launched past top)
+      if (!ball.launched || ball.y < H - 80) {
+        if (ball.x > laneX - ball.r && ball.y > 100) {
+          ball.x = laneX - ball.r;
+          ball.vx = Math.min(ball.vx, 0);
+        }
+      }
+
+      // Side walls
+      if (ball.x < ball.r) { ball.x = ball.r; ball.vx *= -0.7; }
+      if (ball.x > W - ball.r) { ball.x = W - ball.r; ball.vx *= -0.7; }
+      // Top wall
+      if (ball.y < ball.r) { ball.y = ball.r; ball.vy *= -0.7; }
+
+      // Bumpers
+      bumpers.forEach(b => {
+        const dx = ball.x - b.x, dy = ball.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < ball.r + b.r) {
+          const nx = dx / (dist || 1), ny = dy / (dist || 1);
+          ball.x = b.x + nx * (ball.r + b.r);
+          ball.y = b.y + ny * (ball.r + b.r);
+          const kick = 7;
+          ball.vx = nx * kick;
+          ball.vy = ny * kick;
+          score += 10;
+          scoreEl.textContent = score;
+          b.hit = 8;
+        }
+        if (b.hit > 0) b.hit--;
+      });
+
+      // Flippers
+      ballHitsSegment(leftFlipper, flipperTip(leftFlipper, "left"));
+      ballHitsSegment(rightFlipper, flipperTip(rightFlipper, "right"));
+
+      // Ball drains off bottom
+      if (ball.y > H + 30) {
+        resetBall();
+      }
+    } else {
+      ball.x = W - 20;
+      ball.y = H - 60;
+    }
+
+    updateFlippers();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    ctx.fillStyle = "#fff5fa";
+    ctx.fillRect(0, 0, W, H);
+
+    // Launch lane divider
+    ctx.strokeStyle = "#ffc2e0";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(laneX, H);
+    ctx.lineTo(laneX, 100);
+    ctx.stroke();
+
+    // Bumpers
+    bumpers.forEach(b => {
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r + (b.hit > 0 ? 4 : 0), 0, Math.PI * 2);
+      ctx.fillStyle = b.hit > 0 ? "#ff8fc4" : "#ffb3d9";
+      ctx.fill();
+      ctx.strokeStyle = "#e0559c";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.font = "16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🎀", b.x, b.y + 5);
+    });
+
+    // Flippers
+    drawFlipper(leftFlipper, "left");
+    drawFlipper(rightFlipper, "right");
+
+    // Ball
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#e0559c";
+    ctx.fill();
+    ctx.strokeStyle = "#7a3b60";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  function loop() {
+    update();
+    draw();
+    animId = requestAnimationFrame(loop);
+  }
+
+  pinballToggle.addEventListener("click", () => {
+    pinballOverlay.classList.add("active");
+    score = 0;
+    scoreEl.textContent = score;
+    resetBall();
+    if (!animId) loop();
+  });
+
+  pinballClose.addEventListener("click", () => {
+    pinballOverlay.classList.remove("active");
+    cancelAnimationFrame(animId);
+    animId = null;
   });
 </script>
 
